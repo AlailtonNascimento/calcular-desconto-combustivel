@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Combustível</title>
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #141E30, #243B55);
+        color: #fff;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        padding: 10px;
+    }
+    .container {
+        background-color: rgba(0,0,0,0.4);
+        padding: 25px;
+        border-radius: 12px;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(-10px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.6rem;
+    }
+    label {
+        display: block;
+        margin-top: 12px;
+        font-weight: bold;
+    }
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        font-size: 1rem;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+    }
+    .resultado {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: rgba(255,255,255,0.1);
+        border-radius: 6px;
+        display: none;
+        white-space: pre-line;
+        animation: slideUp 0.5s ease-in-out;
+    }
+    @keyframes slideUp {
+        from {opacity: 0; transform: translateY(10px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>⛽ Desconto de Combustível</h1>
+    <label>Preço original por litro:</label>
+    <input type="text" id="precoOriginal" placeholder="R$ 0,00">
+
+    <label>Preço com desconto por litro:</label>
+    <input type="text" id="precoDesconto" placeholder="R$ 0,00">
+
+    <label>Valor disponível:</label>
+    <input type="text" id="valorDisponivel" placeholder="R$ 0,00">
+
+    <div id="resultado" class="resultado"></div>
+</div>
+
+<script>
+// Função para formatar como moeda brasileira
+function formatarMoeda(valor) {
+    valor = valor.replace(/\D/g, "");
+    valor = (valor/100).toFixed(2) + "";
+    valor = valor.replace(".", ",");
+    valor = "R$ " + valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    return valor;
+}
+
+// Aplica máscara nos inputs
+document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", function(){
+        this.value = formatarMoeda(this.value);
+        calcular();
+    });
+});
+
+function moedaParaNumero(moeda) {
+    return parseFloat(moeda.replace(/[R$\s.]/g, "").replace(",", ".")) || 0;
+}
+
+function calcular() {
+    const precoOriginal = moedaParaNumero(document.getElementById("precoOriginal").value);
+    const precoDesconto = moedaParaNumero(document.getElementById("precoDesconto").value);
+    const valorDisponivel = moedaParaNumero(document.getElementById("valorDisponivel").value);
+    const resultadoDiv = document.getElementById("resultado");
+
+    if (precoOriginal > 0 && precoDesconto > 0 && valorDisponivel > 0) {
+        const litrosDesconto = valorDisponivel / precoDesconto;
+        const valorPagoOriginal = litrosDesconto * precoOriginal;
+        const valorPagoDesconto = litrosDesconto * precoDesconto;
+        const economia = valorPagoOriginal - valorPagoDesconto;
+
+        resultadoDiv.textContent =
+`Com R$ ${valorDisponivel.toFixed(2)}, você pode comprar:
+→ ${litrosDesconto.toFixed(2)} litros com desconto (R$ ${precoDesconto.toFixed(2)}/L)
+→ Sem desconto: R$ ${valorPagoOriginal.toFixed(2)}
+→ Com desconto: R$ ${valorPagoDesconto.toFixed(2)}
+→ Economia: R$ ${economia.toFixed(2)}`;
+        resultadoDiv.style.display = "block";
+    } else {
+        resultadoDiv.style.display = "none";
+    }
+}
+</script>
+</body>
+</html>
